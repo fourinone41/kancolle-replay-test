@@ -12,6 +12,8 @@ var COMMON = {
 		
 		formationSingleDefault: 1,
 		formationCombinedDefault: 14,
+		
+		simSaveKey: 'kancolle_sortie_simulator',
 	},
 	global: {},
 	

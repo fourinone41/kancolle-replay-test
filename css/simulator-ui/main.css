@@ -273,8 +273,8 @@ div.progressBarInner {
 
 #divBonusEditorMain {
 	background-color: #DDEEFF;
-	width: 1200px;
-	height: 280px;
+	/* width: 1200px; */
+	/* height: 280px; */
 	border: 1px solid transparent;
 	box-shadow: 0 0 5px black;
 }
@@ -287,6 +287,12 @@ div.progressBarInner {
 }
 #divBonusEditor div.bonusWrap input {
 	width: 70px;
+}
+#divBonusEditor span.statDebuff {
+	color: darkred;
+	font-size: .9em;
+	text-decoration: underline;
+	cursor: help;
 }
 
 #divChangeLog {
@@ -365,4 +371,26 @@ div.modalContent {
 }
 #divKCNavCompImporterSettingsWrap select.suggestion {
 	width: 30px;
+}
+
+#divSimBackupMain {
+	background-color: #DDEEFF;
+	border: 1px solid transparent;
+	box-shadow: 0 0 5px black;
+	padding: 20px;
+}
+#divSimBackupMain div.sectionWrap > div {
+	margin-bottom: 20px;
+}
+#divSimBackupMain span.header {
+	font-weight: bold;
+}
+#divSimBackupMain span.error {
+	color: red;
+}
+#divSimBackupMain div.footer {
+	display: flex;
+}
+#divSimBackupMain div.footer > input {
+	margin-left: auto;
 }

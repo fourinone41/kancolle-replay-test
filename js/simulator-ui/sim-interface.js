@@ -561,20 +561,21 @@ var SIM = {
 				apiBattle = {data:{},yasen:{},mvp:[],rating:'',node:battleInd+1};
 				dataReplay.battles.push(apiBattle);
 			}
+			let doNB = node.doNB && !node.airRaid && !node.NBOnly;
 			if (fleetF.combinedWith) {
 				fleetF.resetBattle();
 				fleetF.combinedWith.resetBattle();
 				if (fleetE.combinedWith) {
-					result = sim12vs12(dataInput.fleetF.combineType,fleetF,fleetF.combinedWith,fleetE,fleetFSupport,lbWaves,node.doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
+					result = sim12vs12(dataInput.fleetF.combineType,fleetF,fleetF.combinedWith,fleetE,fleetFSupport,lbWaves,doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
 				} else {
-					result = simCombined(dataInput.fleetF.combineType,fleetF,fleetF.combinedWith,fleetE,fleetFSupport,lbWaves,node.doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
+					result = simCombined(dataInput.fleetF.combineType,fleetF,fleetF.combinedWith,fleetE,fleetFSupport,lbWaves,doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
 				}
 			} else {
 				fleetF.resetBattle();
 				if (fleetE.combinedWith) {
-					result = sim6vs12(fleetF,fleetE,fleetFSupport,lbWaves,node.doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
+					result = sim6vs12(fleetF,fleetE,fleetFSupport,lbWaves,doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
 				} else {
-					result = sim(fleetF,fleetE,fleetFSupport,lbWaves,node.doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
+					result = sim(fleetF,fleetE,fleetFSupport,lbWaves,doNB,node.NBOnly,node.airOnly,node.airRaid,node.noAmmo,apiBattle,false,fleetFF);
 				}
 			}
 			

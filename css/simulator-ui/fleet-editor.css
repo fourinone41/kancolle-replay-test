@@ -83,6 +83,24 @@ div.fleetEditor div.bonusWrap span {
 	text-decoration: underline;
 	cursor: help;
 }
+div.fleetEditor input.damage.light {
+	background-color: #FFFF80;
+}
+div.fleetEditor input.damage.medium {
+	background-color: #FFD280;
+}
+div.fleetEditor input.damage.heavy {
+	background-color: #FF8080;
+}
+div.fleetEditor input.morale.sparkled {
+	background-color: #FFFF80;
+}
+div.fleetEditor input.morale.orange {
+	background-color: #FFD280;
+}
+div.fleetEditor input.morale.red {
+	background-color: #FF8080;
+}
 
 div.fleetEditor div.equipWrap > div {
 	border-bottom: 1px solid grey;

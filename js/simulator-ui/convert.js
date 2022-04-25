@@ -10,6 +10,7 @@ window.CONVERT = {
 	
 	_UI_MAIN: null,
 	_dataKC3: null,
+	_dataSimSave: null,
 	
 	_copyObj: function(objFrom,keys,objTo) {
 		keys = keys || Object.keys(objFrom);
@@ -21,6 +22,35 @@ window.CONVERT = {
 			else objTo[key] = objFrom[key];
 		}
 		return objTo;
+	},
+	
+	saveIsEmpty: function(dataSave) {
+		return !dataSave.fleetFMain && !dataSave.fleetFSupportN && !dataSave.fleetFSupportB
+			&& (!dataSave.fleetsFFriend || !dataSave.fleetsFFriend.find(comp => comp.fleet))
+			&& (!dataSave.landBases || !dataSave.landBases.find(base => base.equips.find(eq => eq)))
+			&& (!dataSave.battles || !dataSave.battles.find(battle => battle.enemyComps.find(comp => comp.fleet)));
+	},
+	
+	getSimBackupFile: function() {
+		return this._dataSimSave;
+	},
+	setSimBackupFile: function(reader) {
+		if (!reader) {
+			this._dataSimSave = null;
+			return;
+		}
+		let d;
+		try {
+			d = JSON.parse(reader.result);
+		} catch (e) {
+			console.error(e);
+			return;
+		}
+		if (d.source == CONST.simSaveKey) {
+			this._dataSimSave = d;
+		} else {
+			this._dataSimSave = null;
+		}
 	},
 	
 	
@@ -100,7 +130,7 @@ window.CONVERT = {
 	},
 	
 	
-	replayToSaveShipsF: function(shipsReplay) {
+	replayToSaveShipsF: function(shipsReplay,useMorale) {
 		let shipsSave = [];
 		for (let shipReplay of shipsReplay) {
 			let sdata = SHIPDATA[shipReplay.mst_id];
@@ -125,6 +155,7 @@ window.CONVERT = {
 				},
 				equips: [],
 			};
+			if (useMorale && shipReplay.morale && shipReplay.morale >= 50) shipSave.morale = 85;
 			if (shipReplay.stats) {
 				if (shipReplay.stats.ev != null) shipSave.statsBase.ev = shipReplay.stats.ev;
 				if (shipReplay.stats.as != null) shipSave.statsBase.asw = shipReplay.stats.as;
@@ -183,13 +214,11 @@ window.CONVERT = {
 		}
 		
 		if (dataReplay.support1) {
-			dataSave.fleetFSupportN = { type: 0, ships: this.replayToSaveShipsF(dataReplay['fleet'+dataReplay.support1]) };
-			for (let ship of dataSave.fleetFSupportN.ships) ship.morale = 85;
+			dataSave.fleetFSupportN = { type: 0, ships: this.replayToSaveShipsF(dataReplay['fleet'+dataReplay.support1],true) };
 			dataSave.useSupportN = true;
 		}
 		if (dataReplay.support2) {
-			dataSave.fleetFSupportB = { type: 0, ships: this.replayToSaveShipsF(dataReplay['fleet'+dataReplay.support2]) };
-			for (let ship of dataSave.fleetFSupportB.ships) ship.morale = 85;
+			dataSave.fleetFSupportB = { type: 0, ships: this.replayToSaveShipsF(dataReplay['fleet'+dataReplay.support2],true) };
 			dataSave.useSupportB = true;
 		}
 		
@@ -565,12 +594,12 @@ window.CONVERT = {
 			}
 			
 			let bonuses = {};
-			if (shipUI.bonusDmg && shipUI.bonusDmg != 1) bonuses.bonusDmg = shipUI.bonusDmg;
-			if (shipUI.bonusAcc && shipUI.bonusAcc != 1) bonuses.bonusAcc = shipUI.bonusAcc;
-			if (shipUI.bonusEva && shipUI.bonusEva != 1) bonuses.bonusEva = shipUI.bonusEva;
+			if (shipUI.bonusDmg && shipUI.bonusDmg !== '' && shipUI.bonusDmg != 1) bonuses.bonusDmg = shipUI.bonusDmg;
+			if (shipUI.bonusAcc && shipUI.bonusAcc !== '' && shipUI.bonusAcc != 1) bonuses.bonusAcc = shipUI.bonusAcc;
+			if (shipUI.bonusEva && shipUI.bonusEva !== '' && shipUI.bonusEva != 1) bonuses.bonusEva = shipUI.bonusEva;
 			if (Object.keys(bonuses).length) shipInput.bonuses = bonuses;
 			let bonusesDebuff = {};
-			if (shipUI.bonusDmgDebuff != null && shipUI.bonusDmgDebuff != 1) bonusesDebuff.bonusDmg = shipUI.bonusDmgDebuff;
+			if (shipUI.bonusDmgDebuff != null && shipUI.bonusDmgDebuff !== '' && shipUI.bonusDmgDebuff != 1) bonusesDebuff.bonusDmg = shipUI.bonusDmgDebuff;
 			if (Object.keys(bonusesDebuff).length) shipInput.bonusesDebuff = bonusesDebuff;
 			if (nodeIdToNum && shipUI.bonusByNode) {
 				let bonusesByNode = {};

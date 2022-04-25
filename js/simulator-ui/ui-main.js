@@ -126,6 +126,10 @@ var UI_MAIN = Vue.createApp({
 		initEQDATA(() => {
 			document.body.style = '';
 			let dataSave = null;
+			let finishInit = function() {
+				CONVERT.loadSave(dataSave,this);
+				this.canSave = true;
+			}.bind(this);
 			if (window.location.hash.length >= 3) {
 				let dataHash;
 				try {
@@ -141,6 +145,13 @@ var UI_MAIN = Vue.createApp({
 						let dataReplay = dataHash;
 						dataSave = CONVERT.replayToSave(dataReplay);
 						this.settings.airRaidCostW6 = dataReplay.world == 6;
+						if (localStorage.sim2 && !CONVERT.saveIsEmpty(JSON.parse(localStorage.sim2))) {
+							let style = document.createElement('style');
+							style.innerText = '#divMain > *, #divOther { display: none; }';
+							document.head.appendChild(style);
+							UI_BACKUP.doOpen(() => { document.head.removeChild(style); finishInit(); });
+							return;
+						}
 					} else if (dataHash.fleetF && dataHash.nodes) { //sim data
 						console.log('sim data');
 						this.initSimImport(dataHash);
@@ -152,8 +163,7 @@ var UI_MAIN = Vue.createApp({
 			if (!dataSave && localStorage.sim2) {
 				dataSave = JSON.parse(localStorage.sim2);
 			}
-			CONVERT.loadSave(dataSave,this);
-			this.canSave = true;
+			finishInit();
 		});
 	},
 	computed: {
@@ -353,6 +363,10 @@ var UI_MAIN = Vue.createApp({
 			UI_DECKBUILDERIMPORTER.doOpen();
 		},
 		
+		onclickBackup: function() {
+			UI_BACKUP.doOpen();
+		},
+		
 		initSimImport: function(dataInput) {
 			let style = document.createElement('style');
 			style.innerText = '#divMain > *, #divOther { display: none; }';
@@ -404,7 +418,7 @@ var UI_MAIN = Vue.createApp({
 			UI_MAIN.deleteBattle(this.battle.ind,this.$refs.comps);
 		},
 		onclickSetBonus: function() {
-			UI_BONUSEDITOR.doOpen(this.battle.id);
+			UI_BONUSEDITOR.doOpen(this.battle.id,this.battle.ind == UI_MAIN.battles.length-1);
 		},
 	},
 	watch: {
@@ -458,11 +472,13 @@ var UI_BONUSEDITOR = Vue.createApp({
 		active: false,
 		shipGroups: [],
 		nodeId: 0,
+		isBossNode: false,
 	}),
 	methods: {
-		doOpen: function(nodeId) {
+		doOpen: function(nodeId,isBossNode) {
 			this.active = true;
 			this.nodeId = nodeId;
+			this.isBossNode = isBossNode;
 			this.shipGroups = [];
 			this.shipGroups.push(UI_MAIN.fleetFMain.ships.filter(ship => !FLEET_MODEL.shipIsEmpty(ship)));
 			if (UI_MAIN.fleetFMain.shipsEscort && UI_MAIN.fleetFMain.combined) this.shipGroups.push(UI_MAIN.fleetFMain.shipsEscort.filter(ship => !FLEET_MODEL.shipIsEmpty(ship)));
@@ -741,6 +757,95 @@ var UI_KCNAVCOMPIMPORTER = Vue.createApp({
 	},
 }).component('vmodal',COMMON.CMP_MODAL).mount('#divKCNavCompImporter');
 
+
+var UI_BACKUP = Vue.createApp({
+	data: () => ({
+		active: false,
+		canClose: true,
+		isReplayImport: false,
+		confirmReset: false,
+		showImportError: false,
+		
+		callback: null,
+	}),
+	methods: {
+		doOpen: function(callbackReplayImport) {
+			this.active = true;
+			this.confirmReset = false;
+			this.showImportError = false;
+			this.isReplayImport = false;
+			this.canClose = true;
+			if (callbackReplayImport) {
+				this.isReplayImport = true;
+				this.canClose = false;
+				this.callback = callbackReplayImport;
+			}
+		},
+		
+		onclickDownload: function() {
+			let save = { data: JSON.stringify(CONVERT.uiToSave(UI_MAIN)), source: CONST.simSaveKey };
+			
+			let filename = 'KanColle_Sortie_Simulator_Backup_' + (new Date).toISOString().slice(0,10) + '.kcsim';
+
+			let a = window.document.createElement('a');
+			a.href = window.URL.createObjectURL(new Blob([JSON.stringify(save)], {type: 'application/json'}));
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		},
+		
+		onchangeFileBackup: function(e) {
+			if (!e.target.files.length) return;
+			let reader = new FileReader();
+			reader.readAsText(e.target.files[0]);
+			reader.addEventListener('loadend',() => CONVERT.setSimBackupFile(reader));
+			this.showImportError = false;
+		},
+		
+		onclickImportAll: function() {
+			UI_MAIN.canSave = false;
+			let save = CONVERT.getSimBackupFile();
+			if (!save || !save.data) {
+				this.showImportError = true;
+				return;
+			}
+			localStorage.sim2 = save.data;
+			window.location.reload();
+		},
+		
+		onclickImportPlayer: function() {
+			let save = CONVERT.getSimBackupFile();
+			if (!save || !save.data) {
+				this.showImportError = true;
+				return;
+			}
+			let dataSave = JSON.parse(save.data);
+			for (let key of ['fleetFMain','fleetFSupportN','fleetFSupportB']) {
+				if (!dataSave[key]) continue;
+				UI_MAIN[key] = FLEET_MODEL.getBlankFleet(UI_MAIN[key]);
+				CONVERT.loadSaveFleet(dataSave[key],UI_MAIN[key]);
+			}
+			if (dataSave.landBases) {
+				CONVERT.loadSaveLBAS(dataSave.landBases,UI_MAIN.landBases);
+			}
+			COMMON.global.fleetEditorMoveTemp();
+		},
+		
+		onclickContinue: function() {
+			this.canClose = true;
+			this.active = false;
+			this.callback();
+		},
+		
+		onclickResetAll: function() {
+			if (!this.confirmReset) return;
+			UI_MAIN.canSave = false;
+			localStorage.sim2 = '';
+			window.location.reload();
+		},
+	},
+}).component('vmodal',COMMON.CMP_MODAL).mount('#divSimBackup');;
 
 
 document.body.onunload = function() {

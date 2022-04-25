@@ -450,6 +450,16 @@ var UI_FLEETEDITOR = Vue.createApp({
 			if (stat == 'range') return Math.max(ship.statsBase.range,ship.statsEquip.range) + (ship.statsBonus.range || 0);
 			return (+ship.statsBase[stat] || 0) + (+ship.statsEquip[stat] || 0) + ((this.showEquipBonus && +ship.statsBonus[stat]) || 0);
 		},
+		getClassHP: function(ship) {
+			if (ship.hpInit/ship.hp <= .25) return 'damage heavy';
+			if (ship.hpInit/ship.hp <= .5) return 'damage medium';
+			if (ship.hpInit/ship.hp <= .75) return 'damage light';
+		},
+		getClassMorale: function(ship) {
+			if (ship.morale >= 50) return 'morale sparkled';
+			if (ship.morale < 20) return 'morale red';
+			if (ship.morale < 30) return 'morale orange';
+		},
 		
 		doOpen: function(fleet) {
 			this.active = true;

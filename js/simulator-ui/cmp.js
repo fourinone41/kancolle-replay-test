@@ -21,13 +21,16 @@ COMMON.CMP_MODAL = {
 	},
 	watch: {
 		active: function() {
-			if (this.active) setTimeout(() => {
-				this.focusContentTop();
-				let rect = this.$refs.content.getBoundingClientRect();
-				let w = Math.ceil(rect.width/2)*2;
-				let h = Math.ceil(rect.height/2)*2;
-				this.$refs.content.style = 'width:' + w + ';height:' + h;
-			},1);
+			if (this.active) {
+				this.$refs.content.style = '';
+				setTimeout(() => {
+					this.focusContentTop();
+					let rect = this.$refs.content.getBoundingClientRect();
+					let w = Math.ceil(rect.width/2)*2;
+					let h = Math.ceil(rect.height/2)*2;
+					this.$refs.content.style = 'width:' + w + ';height:' + h;
+				},1);
+			}
 		},
 	},
 	template: document.getElementById('tmpModal')
