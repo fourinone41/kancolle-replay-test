@@ -18,6 +18,7 @@
 	<script src="js/kcsimcombined.js"></script>
 	<script src="js/vue.global.prod.js"></script>
 	<script src="js/vue-i18n.global.js"></script>
+	<script src="reader/lz-string.js"></script>
 	<script src="js/simulator-ui/common.js"></script>
 </head>
 <body style="display:none">
@@ -947,7 +948,7 @@
 		<vmodal :active="active" @vclose="canClose&&(active=false)">
 		<div id="divSimBackupMain">
 			<div v-show="isReplayImport">Warning: Replay import will overwrite existing data.<br>Download backup of current fleet and node data?</div>
-			<div v-show="!isReplayImport"><span class="header">Download a backup of current fleet and node data to a JSON file.</span></div>
+			<div v-show="!isReplayImport"><span class="header">Download a backup of current fleet and node data to a file.</span></div>
 			<div class="sectionWrap">
 				<div>
 					<div><input type="button" value="Download" @click="onclickDownload"/></div>

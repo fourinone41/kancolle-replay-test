@@ -6852,7 +6852,7 @@ function getBonusStats(mid,eqids,improves) {
 			}
 			if (bonusData.num && bonusData.num > num) continue;
 			
-			if (bonusData.num || bonusData.requires) num = 1;
+			if (bonusData.num || bonusData.requires || bonusData.requiresType) num = 1;
 			for (let stat in bonusData.bonus) {
 				bonusTotal[stat] += bonusData.bonus[stat] * num;
 			}

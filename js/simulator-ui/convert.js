@@ -41,7 +41,9 @@ window.CONVERT = {
 		}
 		let d;
 		try {
-			d = JSON.parse(reader.result);
+			let txt = reader.result;
+			if (txt[0] != '{') txt = LZString.decompressFromBase64(txt);
+			d = JSON.parse(txt);
 		} catch (e) {
 			console.error(e);
 			return;

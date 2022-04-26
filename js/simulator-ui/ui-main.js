@@ -788,7 +788,7 @@ var UI_BACKUP = Vue.createApp({
 			let filename = 'KanColle_Sortie_Simulator_Backup_' + (new Date).toISOString().slice(0,10) + '.kcsim';
 
 			let a = window.document.createElement('a');
-			a.href = window.URL.createObjectURL(new Blob([JSON.stringify(save)], {type: 'application/json'}));
+			a.href = window.URL.createObjectURL(new Blob([LZString.compressToBase64(JSON.stringify(save))], {type: 'application/json'}));
 			a.download = filename;
 			document.body.appendChild(a);
 			a.click();
