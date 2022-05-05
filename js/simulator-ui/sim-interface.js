@@ -8,23 +8,25 @@ var CONST = window.COMMON.getConst({
 	numSimStep: 500,
 	
 	errorText: {
-		'bad_data': 'Bad format data',
-		'no_ship_stats': 'Unknown ship: <0>, stats required',
-		'no_equip_stats': 'Unknown equip: <0>, stats required',
-		'no_fleet_f': 'Player fleet has no ships.',
-		'no_fleet_e': 'Node <0> Enemy fleet has no ships.',
-		'no_fleetc_f': 'Player escort fleet has no ships.',
-		'no_fleetc_e': 'Node <0> Enemy escort fleet has no ships.',
-		'no_combinetype': 'Unsupported combineType: <0>',
-		'bad_ship_type': 'Invalid ship type: <0>',
-		'bad_formation': 'Invalid formation: <0>',
+		'bad_data': { txt: 'Bad format data' },
+		'no_ship_stats': { txt: 'Unknown ship: <0>, stats required' },
+		'no_equip_stats': { txt: 'Unknown equip: <0>, stats required' },
+		'no_fleet_f': { txt: 'Player fleet has no ships.' },
+		'no_fleet_e': { txt: 'Node <0> Enemy fleet has no ships.' },
+		'no_fleetc_f': { txt: 'Player escort fleet has no ships.' },
+		'no_fleetc_e': { txt: 'Node <0> Enemy escort fleet has no ships.' },
+		'no_combinetype': { txt: 'Unsupported combineType: <0>' },
+		'bad_ship_type': { txt: 'Invalid ship type: <0>' },
+		'bad_formation': { txt: 'Invalid formation: <0>' },
 		
-		'warn_unknown_equiptype': 'Warning: Unknown equip type - <0>, effects may be missing',
-		'warn_unknown_ship': 'Warning: Unknown ship - <0>, unique effects may be missing',
-		'warn_unknown_equip': 'Warning: Unknown equip - <0>, unique effects may be missing',
-		'warn_ship_unknownstats': 'Warning: Real ship stats currently not known - <0>',
-		'warn_bad_mechanic': 'Warning: Invalid mechanic: <0>',
-		'warn_bad_const': 'Warning: Invalid const: <0>',
+		'warn_unknown_equiptype': { txt: 'Warning: Unknown equip type - <0>, effects may be missing' },
+		'warn_unknown_ship': { txt: 'Warning: Unknown ship - <0>, unique effects may be missing' },
+		'warn_unknown_equip': { txt: 'Warning: Unknown equip - <0>, unique effects may be missing' },
+		'warn_ship_unknownstats': { txt: 'Warning: Real ship stats currently not known - <0>', excludeClient: true },
+		'warn_bad_mechanic': { txt: 'Warning: Invalid mechanic: <0>' },
+		'warn_bad_const': { txt: 'Warning: Invalid const: <0>' },
+		'warn_no_nb': { txt: 'Warning: Night Battle not enabled on last node, intentional?' },
+		'warn_no_subonly': { txt: 'Warning: Sub-only supply cost not enabled on Node <0>, intentional?' },
 	},
 });
 	
@@ -38,27 +40,27 @@ var SIM = {
 	_inputPrev: {},
 
 	_addError: function(key,args) {
-		let txt = CONST.errorText[key];
+		let txt = CONST.errorText[key].txt;
 		if (args) {
 			for (let i=0; i<args.length; i++) {
 				txt = txt.replace('<'+i+'>',(args[i] != null ? args[i].toString() : 'undefined'));
 			}
 		}
 		if (this._saveErrors) {
-			this._errors.push(txt);
+			this._errors.push({ txt: txt, excludeClient: !!CONST.errorText[key].excludeClient });
 		} else {
 			console.log('error: ' + txt);
 		}
 	},
 	_addWarning: function(key,args) {
-		let txt = CONST.errorText[key];
+		let txt = CONST.errorText[key].txt;
 		if (args) {
 			for (let i=0; i<args.length; i++) {
 				txt = txt.replace('<'+i+'>',(args[i] != null ? args[i].toString() : 'undefined'));
 			}
 		}
 		if (this._saveErrors) {
-			this._warnings.push(txt);
+			this._warnings.push({ txt: txt, excludeClient: !!CONST.errorText[key].excludeClient });
 		} else {
 			console.log('warning: ' + txt);
 		}
@@ -459,12 +461,14 @@ var SIM = {
 				this._addError('no_fleet_e',[i+1]);
 			}
 			
+			let fleetsSimE = [];
 			if (this._compListsEnemy[i]) {
 				for (let j=0; j<node.fleetEComps.length; j++) {
 					if (!this._compListsEnemy[i][j].fleet) {
 						this._addError('no_fleet_e',[i+1]);
 					} else {
 						if (node.fleetEComps[j].fleet.shipsC && !this._compListsEnemy[i][j].fleet.combinedWith) this._addError('no_fleetc_e',[i+1]);
+						fleetsSimE.push(this._compListsEnemy[i][j].fleet);
 					}
 				}
 			} else {
@@ -473,7 +477,11 @@ var SIM = {
 				} else {
 					let fleetE = node.fleetEComps ? node.fleetEComps[0].fleet : node.fleetE;
 					if (fleetE.shipsC && !FLEETS2[i].combinedWith) this._addError('no_fleetc_e',[i+1]);
+					fleetsSimE.push(FLEETS2[i]);
 				}
+			}
+			if (!node.noAmmo && fleetsSimE.every(fleetSim => !fleetSim.combinedWith && fleetSim.ships.every(ship => ship.type == 'SS' || ship.type == 'SSV'))) {
+				this._addWarning('warn_no_subonly',[i+1]);
 			}
 		}
 		
@@ -485,6 +493,10 @@ var SIM = {
 		
 		if (dataInput.didSpecial) MECHANICS.specialAttacks = false;
 		
+		let nodeLast = dataInput.nodes.at(-1);
+		if (dataInput.nodes.length > 1 && !nodeLast.doNB && !nodeLast.NBOnly && !nodeLast.airRaid) {
+			this._addWarning('warn_no_nb');
+		}
 	},
 	
 	_doSimSortie: function(dataInput,dataReplay) {

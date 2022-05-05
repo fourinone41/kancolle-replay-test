@@ -1,5 +1,6 @@
 <html>
 <head>
+	<title>KanColle Sortie Simulator</title>
 	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 	<meta content="utf-8" http-equiv="encoding">
 
@@ -169,7 +170,7 @@
 			<div id="divResultsErrors">
 				<div v-for="error in results.errors">{{error}}</div>
 			</div>
-			<div id="divResultsWarnings" v-show="results.showWarnings">
+			<div id="divResultsWarnings">
 				<div v-for="warning in results.warnings">{{warning}}</div>
 			</div>
 			
@@ -200,7 +201,7 @@
 							<div>Avg <span class="resultBold">-{{results.flagSunkHP}}</span> HP per run</div>
 							<div>Avg <span class="resultBold">-{{results.flagSunkHPBoss}}</span> HP per boss</div>
 						</div>
-						<div>
+						<div v-show="results.numNodes>1">
 							<div>Rank Per Battle:</div>
 							<table class="multi">
 							<tr><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
@@ -218,7 +219,7 @@
 						<div>
 							<div><img src="assets/stats/MVP.png"/> Rate Per Battle:</div>
 							<table class="multi">
-							<tr><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
+							<tr v-show="results.numNodes>1"><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
 							<tr v-for="n in 7" v-show="results.hasSF||n<7"><th><img :src="'assets/stats/F' + n + '.png'"/></th><td v-for="stat in results['mvp'+n]">{{stat}}</td></tr>
 							<tr class="tableSpace" v-show="results.hasCF"></tr>
 							<tr v-for="n in 6" v-show="results.hasCF"><th><img :src="'assets/stats/F' + n + '.png'"/></th><td v-for="stat in results['mvpE'+n]">{{stat}}</td></tr>
@@ -227,7 +228,7 @@
 						<div>
 							<div>Air State Rate Per Battle:</div>
 							<table class="multi">
-							<tr><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
+							<tr v-show="results.numNodes>1"><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
 							<tr><th><span class="air good">AS+</span></th><td v-for="stat in results.airASP">{{stat}}</td></tr>
 							<tr><th><span class="air good">AS</span></th><td v-for="stat in results.airAS">{{stat}}</td></tr>
 							<tr><th><span class="air">AP</span></th><td v-for="stat in results.airAP">{{stat}}</td></tr>
@@ -240,7 +241,7 @@
 						<div>
 							<div><img src="assets/stats/taiha.png"/> Rate Per Battle:</div>
 							<table class="multi">
-							<tr><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
+							<tr v-show="results.numNodes>1"><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
 							<tr><th>Any</th><td v-for="stat in results.taiha"><span class="resultBold">{{stat}}</span></td></tr>
 							<tr class="tableSpace"></tr>
 							<tr v-for="n in 7" v-show="results.hasSF||n<7"><th><img :src="'assets/stats/F' + n + '.png'"/></th><td v-for="stat in results['taiha'+n]">{{stat}}</td></tr>
@@ -251,7 +252,7 @@
 						<div>
 							<div>No <img src="assets/stats/chuuha.png"/> After Battle:</div>
 							<table class="multi">
-							<tr><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
+							<tr v-show="results.numNodes>1"><th></th><th v-for="n in results.numNodes">{{n}}</th></tr>
 							<tr><th>All</th><td v-for="stat in results.noChuuha">{{stat}}</td></tr>
 							</table>
 						</div>

@@ -33,8 +33,8 @@ var MECHANICS_LIST = [
 	{ key: 'subFleetAttack', name: 'Submarine Fleet Attack' },
 	{ key: 'kongouSpecialBuff', name: 'Kongou Special Buff' },
 	{ key: 'coloradoSpecialFix', name: 'Colorado Special Fix' },
-	{ key: 'eqBonusASW', name: 'ASW Use Equipment Bonus' },
 	{ key: 'eqBonusTorp', name: 'Torpedo Airstrike Use Equipment Bonus' },
+	{ key: 'eqBonusASW', name: 'ASW Use Equipment Bonus' },
 ];
 
 
@@ -86,7 +86,7 @@ var UI_MAIN = Vue.createApp({
 		results: {
 			active: false,
 			showCFWarning: false,
-			showWarnings: false,
+			isFromImport: false,
 			errors: [],
 			warnings: [],
 			numNodes: 0,
@@ -311,12 +311,12 @@ var UI_MAIN = Vue.createApp({
 		
 		callbackSimStats: function(res) {
 			if (res.errors) {
-				this.results.errors = res.errors;
+				this.results.errors = res.errors.filter(obj => this.results.isFromImport || !obj.excludeClient).map(obj => obj.txt);
 				this.canSim = true;
 				return;
 			}
-			if (res.warnings && this.results.showWarnings) {
-				this.results.warnings = res.warnings;
+			if (res.warnings) {
+				this.results.warnings = res.warnings.filter(obj => this.results.isFromImport || !obj.excludeClient).map(obj => obj.txt);
 			}
 			if (res.didReset) {
 				this.results.active = false;
@@ -372,7 +372,7 @@ var UI_MAIN = Vue.createApp({
 			style.innerText = '#divMain > *, #divOther { display: none; }';
 			document.head.appendChild(style);
 			this.canSim = false;
-			this.results.showWarnings = true;
+			this.results.isFromImport = true;
 			SIM.runStats(dataInput,this.callbackSimStats);
 		},
 	},
@@ -610,8 +610,8 @@ var UI_KCNAVCOMPIMPORTER = Vue.createApp({
 		optionsLetter: [],
 	}),
 	mounted: function() {
-		for (let id of Object.keys(MAPDATA).sort((a,b) => +a-+b)) {
-			if (+id > 10 && +id < CONST.kcnavEventFirst) continue;
+		let keys = [1,2,3,7,4,5,6].concat(Object.keys(MAPDATA).filter(id => +id > 7 && +id >= CONST.kcnavEventFirst).sort((a,b) => +a-+b));
+		for (let id of keys) {
 			this.optionsWorld.push({ id: +id, name: MAPDATA[id].name.replace('Event ','') });
 		}
 	},

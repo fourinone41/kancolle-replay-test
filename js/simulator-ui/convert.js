@@ -99,7 +99,9 @@ window.CONVERT = {
 				},
 				equips: [],
 			};
-			for (let eid of shipKC3.items) {
+			let items = shipKC3.items.slice();
+			if (shipKC3.ex_item) items.push(shipKC3.ex_item);
+			for (let eid of items) {
 				if (!eid || eid <= 0) continue;
 				let equipKC3 = this._dataKC3.gears['x'+eid];
 				let equipSave = {
@@ -530,6 +532,7 @@ window.CONVERT = {
 				},
 				equips: shipNav.equips.filter(id => id != -1).map(id => ({ mstId: id, rank: 0 })),
 			};
+			if (shipNav.exslot && shipNav.exslot != -1) shipSave.equips.push({ mstId: shipNav.exslot, rank: 0 });
 			shipsSave.push(shipSave);
 		}
 		return shipsSave;
