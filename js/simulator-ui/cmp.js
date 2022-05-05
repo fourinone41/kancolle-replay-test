@@ -23,13 +23,13 @@ COMMON.CMP_MODAL = {
 		active: function() {
 			if (this.active) {
 				this.$refs.content.style = '';
-				setTimeout(() => {
+				this.$nextTick(() => {
 					this.focusContentTop();
 					let rect = this.$refs.content.getBoundingClientRect();
 					let w = Math.ceil(rect.width/2)*2;
 					let h = Math.ceil(rect.height/2)*2;
 					this.$refs.content.style = 'width:' + w + ';height:' + h;
-				},1);
+				});
 			}
 		},
 	},
